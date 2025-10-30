@@ -6,6 +6,10 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
@@ -37,12 +41,32 @@ public class BMIController {
     private TextField resultField;
     @FXML
     private Button calculateButton;
+    @FXML
+    private Label timeLabel;
+
+    private HashMap<String, String> supportedLanguages = new HashMap<>() {{
+        put("en", "US");
+        put("fr", "FR");
+        put("ur", "PK");
+        put("vi", "VN");
+    }};
 
     public void initialize() {
         setLanguage("en", "US");
     }
 
+    public boolean isSupportedLanguage(String language) {
+        if (supportedLanguages.containsKey(language)) {
+            return true;
+        }
+        return false;
+    }
+
     public void setLanguage(String language, String country) {
+        if (!isSupportedLanguage(language)) {
+            resultField.setText("unsupportedLanguage");
+            return;
+        }
         Locale locale = new Locale(language, country);
         rb = ResourceBundle.getBundle("MessagesBundle", locale);
         welcomeText.setText(rb.getString("welcomeText"));
@@ -54,33 +78,74 @@ public class BMIController {
         heightLabel.setText(rb.getString("heightLabel"));
         resultLabel.setText(rb.getString("resultLabel"));
         calculateButton.setText(rb.getString("calculateButton"));
+        if (resultField != null) {
+            resultField.setText("");
+        }
+        updateTimeForLocate(language, country);
     }
 
-
     public void onCalculateClick(ActionEvent actionEvent) {
-        double weightKg = Double.parseDouble(weightField.getText());
-        double heightM = Double.parseDouble(heightField.getText());
-        if (heightM <= 0) {
+        if (weightField.getText().isEmpty() || heightField.getText().isEmpty()) {
             resultField.setText(rb.getString("errorResultLabel"));
             return;
         }
-        double bmi = bmiCalculator.calculateBMI(weightKg, heightM);
-        resultField.setText(String.format("%.2f", bmi));
+        try {
+            double weightKg = Double.parseDouble(weightField.getText().replace(",", "."));
+            double heightM = Double.parseDouble(heightField.getText().replace(",", "."));
+            if (heightM <= 0 || weightKg <= 0) {
+                resultField.setText(rb.getString("errorResultLabel"));
+                return;
+            }
+            if (heightM > 4) {
+                resultField.setText(rb.getString("errorResultLabel"));
+                return;
+            }
+            double bmi = bmiCalculator.calculateBMI(weightKg, heightM);
+            resultField.setText(String.format("%.2f", bmi));
+        } catch (NumberFormatException e) {
+            resultField.setText(rb.getString("errorResultLabel"));
+        }
     }
 
     public void onEnglishClick(ActionEvent actionEvent) {
         setLanguage("en", "US");
     }
 
-    public void onFinnishClick(ActionEvent actionEvent) {
-        setLanguage("fi", "FI");
+    public void onFrenchClick(ActionEvent actionEvent) {
+        setLanguage("fr", "FR");
     }
 
-    public void onJapanClick(ActionEvent actionEvent) {
-        setLanguage("ja", "JP");
+    public void onUrduClick(ActionEvent actionEvent) {
+        setLanguage("ur", "PK");
     }
 
-    public void onSwedishClick(ActionEvent actionEvent) {
-        setLanguage("sv", "SE");
+    public void onVietnameseClick(ActionEvent actionEvent) {
+        setLanguage("vi", "VN");
     }
+
+    public void updateTimeForLocate(String language, String country) {
+        String zoneId;
+        switch (country) {
+            case "US":
+                zoneId = "America/New_York";
+                break;
+            case "FR":
+                zoneId = "Europe/Paris";
+                break;
+            case "PK":
+                zoneId = "Asia/Karachi";
+                break;
+
+            case "VN":
+                zoneId = "Asia/Ho_Chi_Minh";
+                break;
+            default:
+                zoneId = "UTC";
+        }
+        ZonedDateTime zoneDate = ZonedDateTime.now(ZoneId.of(zoneId));
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyy HH:mm:ss");
+        String formattedTime = zoneDate.format(formatter);
+        timeLabel.setText(formattedTime);
+    }
+
 }

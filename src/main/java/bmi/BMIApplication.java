@@ -12,7 +12,7 @@ public class BMIApplication extends Application {
     public void start(Stage stage) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(BMIApplication.class.getResource("bmi-view.fxml"));
         Scene scene = new Scene(fxmlLoader.load(), 340, 440);
-        stage.setTitle("BMI Calculator");
+        stage.setTitle("Nea Lukumies: BMI Calculator");
         stage.setScene(scene);
         stage.show();
     }
