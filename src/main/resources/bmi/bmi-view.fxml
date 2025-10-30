@@ -6,19 +6,23 @@
 <?import javafx.geometry.Insets?>
 
 
-<VBox alignment="CENTER" spacing="20.0" xmlns:fx="http://javafx.com/fxml"
+<VBox alignment="CENTER" spacing="10.0" xmlns:fx="http://javafx.com/fxml"
       fx:controller="bmi.BMIController">
     <padding>
         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
     </padding>
 
     <Label fx:id="welcomeText"/>
-    <Label fx:id="weightLabel" text="Enter your weight (kg):"/>
+    <Button fx:id="button1" text="button1" onAction="#onEnglishClick"/>
+    <Button fx:id="button2" text="button2" onAction="#onFinnishClick"/>
+    <Button fx:id="button3" text="button3" onAction="#onJapanClick"/>
+    <Button fx:id="button4" text="button4" onAction="#onSwedishClick"/>
+    <Label fx:id="weightLabel"/>
     <TextField fx:id="weightField"/>
-    <Label fx:id="heightLabel" text="Enter your height (m):"/>
+    <Label fx:id="heightLabel"/>
     <TextField fx:id="heightField"/>
-    <Button fx:id="calculateButton" text="Calculate BMI" onAction="#onCalculateClick"/>
-    <Label fx:id="resultLabel" text="Result:" />
+    <Button fx:id="calculateButton" onAction="#onCalculateClick"/>
+    <Label fx:id="resultLabel" />
     <TextField fx:id="resultField" editable="false"/>
 
 </VBox>
