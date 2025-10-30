@@ -24,6 +24,7 @@
     <Button fx:id="calculateButton" onAction="#onCalculateClick"/>
     <Label fx:id="resultLabel" />
     <TextField fx:id="resultField" editable="false"/>
+    <Label fx:id="errorLabel" style="-fx-text-fill: red;" visible="false" />
     <Label fx:id="timeLabel" />
 
 

@@ -43,6 +43,8 @@ public class BMIController {
     private Button calculateButton;
     @FXML
     private Label timeLabel;
+    @FXML
+    private Label errorLabel;
 
     private HashMap<String, String> supportedLanguages = new HashMap<>() {{
         put("en", "US");
@@ -64,7 +66,7 @@ public class BMIController {
 
     public void setLanguage(String language, String country) {
         if (!isSupportedLanguage(language)) {
-            resultField.setText("unsupportedLanguage");
+            errorLabel.setText("unsupportedLanguage");
             return;
         }
         Locale locale = new Locale(language, country);
@@ -78,32 +80,39 @@ public class BMIController {
         heightLabel.setText(rb.getString("heightLabel"));
         resultLabel.setText(rb.getString("resultLabel"));
         calculateButton.setText(rb.getString("calculateButton"));
-        if (resultField != null) {
-            resultField.setText("");
+        if (errorLabel != null) {
+            errorLabel.setText(rb.getString("errorResultLabel"));
         }
         updateTimeForLocate(language, country);
     }
 
+
     public void onCalculateClick(ActionEvent actionEvent) {
+        errorLabel.setVisible(false);
+        resultField.setText("");
         if (weightField.getText().isEmpty() || heightField.getText().isEmpty()) {
-            resultField.setText(rb.getString("errorResultLabel"));
+            errorLabel.setVisible(true);
+            errorLabel.setText(rb.getString("errorResultLabel"));
             return;
         }
         try {
             double weightKg = Double.parseDouble(weightField.getText().replace(",", "."));
             double heightM = Double.parseDouble(heightField.getText().replace(",", "."));
             if (heightM <= 0 || weightKg <= 0) {
-                resultField.setText(rb.getString("errorResultLabel"));
+                errorLabel.setVisible(true);
+                errorLabel.setText(rb.getString("errorResultLabel"));
                 return;
             }
             if (heightM > 4) {
-                resultField.setText(rb.getString("errorResultLabel"));
+                errorLabel.setVisible(true);
+                errorLabel.setText(rb.getString("errorResultLabel"));
                 return;
             }
             double bmi = bmiCalculator.calculateBMI(weightKg, heightM);
             resultField.setText(String.format("%.2f", bmi));
         } catch (NumberFormatException e) {
-            resultField.setText(rb.getString("errorResultLabel"));
+            errorLabel.setVisible(true);
+            errorLabel.setText(rb.getString("errorResultLabel"));
         }
     }
 
