@@ -159,7 +159,7 @@ public class BMIController {
     }
 
     public void displayLocalTime(Locale locale) {
-        String country = supportedLanguages.getOrDefault(locale.getLanguage(), "US");
+        String country = locale.getCountry();
         updateTimeForLocate(country);
     }
 
