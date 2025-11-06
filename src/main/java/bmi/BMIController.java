@@ -12,10 +12,13 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import java.util.Map;
 
 public class BMIController {
     private BMICalculator bmiCalculator = new BMICalculator();
     private ResourceBundle rb;
+    private Map<String, String> localizedStrings;
+    private Locale locale;
 
     @FXML
     private Label welcomeText;
@@ -54,7 +57,7 @@ public class BMIController {
     }};
 
     public void initialize() {
-        setLanguage("en", "US");
+        setLanguage(new Locale("en", "US"));
     }
 
     public boolean isSupportedLanguage(String language) {
@@ -64,26 +67,45 @@ public class BMIController {
         return false;
     }
 
-    public void setLanguage(String language, String country) {
-        if (!isSupportedLanguage(language)) {
-            errorLabel.setText("unsupportedLanguage");
-            return;
-        }
-        Locale locale = new Locale(language, country);
+//    public void setLanguage(String language, String country) {
+//        if (!isSupportedLanguage(language)) {
+//            errorLabel.setText("unsupportedLanguage");
+//            return;
+//        }
+//        Locale locale = new Locale(language, country);
+//        rb = ResourceBundle.getBundle("MessagesBundle", locale);
+//        welcomeText.setText(rb.getString("welcomeText"));
+//        button1.setText(rb.getString("button1"));
+//        button2.setText(rb.getString("button2"));
+//        button3.setText(rb.getString("button3"));
+//        button4.setText(rb.getString("button4"));
+//        weightLabel.setText(rb.getString("weightLabel"));
+//        heightLabel.setText(rb.getString("heightLabel"));
+//        resultLabel.setText(rb.getString("resultLabel"));
+//        calculateButton.setText(rb.getString("calculateButton"));
+//        if (errorLabel != null) {
+//            errorLabel.setText(rb.getString("errorResultLabel"));
+//        }
+//        updateTimeForLocate(language, country);
+//    }
+
+    private void setLanguage(Locale locale) {
+        this.locale = locale;
+        resultLabel.setText("");
         rb = ResourceBundle.getBundle("MessagesBundle", locale);
         welcomeText.setText(rb.getString("welcomeText"));
         button1.setText(rb.getString("button1"));
         button2.setText(rb.getString("button2"));
         button3.setText(rb.getString("button3"));
         button4.setText(rb.getString("button4"));
-        weightLabel.setText(rb.getString("weightLabel"));
-        heightLabel.setText(rb.getString("heightLabel"));
-        resultLabel.setText(rb.getString("resultLabel"));
-        calculateButton.setText(rb.getString("calculateButton"));
-        if (errorLabel != null) {
-            errorLabel.setText(rb.getString("errorResultLabel"));
-        }
-        updateTimeForLocate(language, country);
+
+
+        localizedStrings = LocalizationService.getLocalizedStrings(locale);
+        weightLabel.setText(localizedStrings.getOrDefault("weight", "Weight"));
+        heightLabel.setText(localizedStrings.getOrDefault("height", "Height"));
+        calculateButton.setText(localizedStrings.getOrDefault("calculate", "Calculate"));
+
+        displayLocalTime(locale);
     }
 
 
@@ -97,19 +119,23 @@ public class BMIController {
         }
         try {
             double weightKg = Double.parseDouble(weightField.getText().replace(",", "."));
-            double heightM = Double.parseDouble(heightField.getText().replace(",", "."));
-            if (heightM <= 0 || weightKg <= 0) {
+            double heightCm = Double.parseDouble(heightField.getText().replace(",", "."));
+            if (heightCm <= 0 || weightKg <= 0) {
                 errorLabel.setVisible(true);
                 errorLabel.setText(rb.getString("errorResultLabel"));
                 return;
             }
-            if (heightM > 4) {
+            if (heightCm > 400) {
                 errorLabel.setVisible(true);
                 errorLabel.setText(rb.getString("errorResultLabel"));
                 return;
             }
-            double bmi = bmiCalculator.calculateBMI(weightKg, heightM);
+            double bmi = bmiCalculator.calculateBMI(weightKg, heightCm);
             resultField.setText(String.format("%.2f", bmi));
+
+            String language = locale.getLanguage();
+            BMIResultService.saveResult(weightKg, heightCm, bmi, language);
+
         } catch (NumberFormatException e) {
             errorLabel.setVisible(true);
             errorLabel.setText(rb.getString("errorResultLabel"));
@@ -117,22 +143,27 @@ public class BMIController {
     }
 
     public void onEnglishClick(ActionEvent actionEvent) {
-        setLanguage("en", "US");
+        setLanguage(new Locale("en", "US"));
     }
 
     public void onFrenchClick(ActionEvent actionEvent) {
-        setLanguage("fr", "FR");
+        setLanguage(new Locale("fr", "FR"));
     }
 
     public void onUrduClick(ActionEvent actionEvent) {
-        setLanguage("ur", "PK");
+        setLanguage(new Locale("ur", "PK"));
     }
 
     public void onVietnameseClick(ActionEvent actionEvent) {
-        setLanguage("vi", "VN");
+        setLanguage(new Locale("vi", "VN"));
     }
 
-    public void updateTimeForLocate(String language, String country) {
+    public void displayLocalTime(Locale locale) {
+        String country = supportedLanguages.getOrDefault(locale.getLanguage(), "US");
+        updateTimeForLocate(country);
+    }
+
+    public void updateTimeForLocate(String country) {
         String zoneId;
         switch (country) {
             case "US":
